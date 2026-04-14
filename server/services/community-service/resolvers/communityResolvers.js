@@ -1,0 +1,145 @@
+const axios = require('axios');
+const Post = require('../models/Post');
+
+const AI_SERVICE_URL = `http://localhost:${process.env.AI_SERVICE_PORT || 4004}`;
+
+const resolvers = {
+  Query: {
+    getPosts: async (_, { category, limit = 20, offset = 0 }) => {
+      const filter = category ? { category } : {};
+      return Post.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(offset)
+        .limit(limit);
+    },
+
+    getPost: async (_, { id }) => {
+      return Post.findById(id);
+    },
+
+    getPostsByAuthor: async (_, { authorId }) => {
+      return Post.find({ authorId }).sort({ createdAt: -1 });
+    },
+
+    getHelpRequests: async (_, { status }) => {
+      const filter = { category: 'help_request' };
+      if (status) filter.status = status;
+      return Post.find(filter).sort({ isUrgent: -1, createdAt: -1 });
+    },
+
+    getEmergencyAlerts: async () => {
+      return Post.find({ category: 'emergency_alert' }).sort({ createdAt: -1 });
+    },
+
+    getTrendingTopics: async () => {
+      try {
+        // Get recent posts and let AI detect trends
+        const recentPosts = await Post.find()
+          .sort({ createdAt: -1 })
+          .limit(100)
+          .select('title content tags');
+
+        const response = await axios.post(`${AI_SERVICE_URL}/api/trends`, {
+          posts: recentPosts.map((p) => ({
+            title: p.title,
+            content: p.content,
+            tags: p.tags,
+          })),
+        });
+
+        return response.data.trends;
+      } catch (error) {
+        console.error('AI trend detection failed:', error.message);
+        return [];
+      }
+    },
+  },
+
+  Mutation: {
+    createPost: async (_, { title, content, category, tags, isUrgent }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const post = await Post.create({
+        title,
+        content,
+        category,
+        tags: tags || [],
+        isUrgent: isUrgent || false,
+        authorId: user.id,
+      });
+
+      // Asynchronously analyze sentiment (don't block the response)
+      axios
+        .post(`${AI_SERVICE_URL}/api/sentiment`, { text: content })
+        .then((res) => {
+          Post.findByIdAndUpdate(post.id, { aiSentiment: res.data.sentiment }).catch(() => {});
+        })
+        .catch(() => {});
+
+      return post;
+    },
+
+    updatePost: async (_, { id, ...updates }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const post = await Post.findById(id);
+      if (!post) throw new Error('Post not found');
+      if (post.authorId !== user.id) throw new Error('Not authorized');
+
+      return Post.findByIdAndUpdate(id, updates, { new: true });
+    },
+
+    deletePost: async (_, { id }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      const post = await Post.findById(id);
+      if (!post) throw new Error('Post not found');
+      if (post.authorId !== user.id) throw new Error('Not authorized');
+
+      await Post.findByIdAndDelete(id);
+      return true;
+    },
+
+    addReply: async (_, { postId, content }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      return Post.findByIdAndUpdate(
+        postId,
+        { $push: { replies: { authorId: user.id, content } } },
+        { new: true }
+      );
+    },
+
+    summarizePost: async (_, { postId }) => {
+      const post = await Post.findById(postId);
+      if (!post) throw new Error('Post not found');
+
+      // Build the full text: post content + all replies
+      const fullText = [
+        post.content,
+        ...post.replies.map((r) => r.content),
+      ].join('\n\n');
+
+      try {
+        const response = await axios.post(`${AI_SERVICE_URL}/api/summarize`, {
+          text: fullText,
+        });
+
+        post.aiSummary = response.data.summary;
+        await post.save();
+      } catch (error) {
+        console.error('AI summarization failed:', error.message);
+      }
+
+      return post;
+    },
+  },
+
+  // Federation: resolve the author field using the User reference
+  Post: {
+    author: (post) => ({ __typename: 'User', id: post.authorId }),
+
+    __resolveReference: async (ref) => {
+      return Post.findById(ref.id);
+    },
+  },
+};
+
+module.exports = resolvers;
