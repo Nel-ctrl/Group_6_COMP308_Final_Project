@@ -3,7 +3,7 @@ import { ApolloProvider } from '@apollo/client';
 import client from './apollo/client';
 import { AuthProvider } from './shared/context/AuthContext';
 import Navbar from './shared/components/Navbar';
-
+import CreateEventPage from './modules/events/pages/CreateEventPage';
 // Pages
 import HomePage from './modules/auth/pages/HomePage';
 import LoginPage from './modules/auth/pages/LoginPage';
@@ -26,6 +26,7 @@ export default function App() {
               <Route path="/community" element={<CommunityPage />} />
               <Route path="/businesses" element={<BusinessesPage />} />
               <Route path="/events" element={<EventsPage />} />
+              <Route path="/events/create" element={<CreateEventPage />} />
             </Routes>
           </div>
         </AuthProvider>

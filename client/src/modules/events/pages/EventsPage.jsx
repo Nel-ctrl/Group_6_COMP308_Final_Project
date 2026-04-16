@@ -6,9 +6,26 @@ import { Link } from 'react-router-dom';
 
 export default function EventsPage() {
   const { user } = useAuth();
-  const { data, loading, error, refetch } = useQuery(GET_EVENTS, {
-    variables: { status: 'upcoming' },
+  const formatEventDate = (dateValue) => {
+  if (!dateValue) return "No date";
+
+  const parsedDate = new Date(Number(dateValue));
+
+  if (isNaN(parsedDate.getTime())) return "Invalid Date";
+
+  return parsedDate.toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
+};
+  const { data, loading, error, refetch } = useQuery(GET_EVENTS, {
+  variables: { status: 'upcoming', category: "" },
+  fetchPolicy: 'network-only',
+});
 
   const [joinEvent] = useMutation(JOIN_EVENT, { onCompleted: refetch });
   const [volunteerForEvent] = useMutation(VOLUNTEER_FOR_EVENT, { onCompleted: refetch });
@@ -47,10 +64,7 @@ export default function EventsPage() {
               <p className="text-sm text-gray-600 mb-3">{event.description}</p>
 
               <div className="text-sm text-gray-500 space-y-1 mb-4">
-                <p>Date: {new Date(event.date).toLocaleDateString('en-US', {
-                  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                  hour: '2-digit', minute: '2-digit',
-                })}</p>
+                <p>Date: {formatEventDate(event.date)}</p>
                 <p>Location: {event.location}</p>
                 <p>
                   Attendees: {event.attendees?.length || 0}
