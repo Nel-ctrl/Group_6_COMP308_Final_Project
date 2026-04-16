@@ -1,6 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,jsx}'],
+  content: {
+    relative: true,
+    files: [
+      './index.html',
+      './src/**/*.{js,jsx}',
+      '../remote-auth/src/**/*.{js,jsx}',
+      '../remote-community/src/**/*.{js,jsx}',
+      '../remote-events/src/**/*.{js,jsx}',
+    ],
+  },
   theme: {
     extend: {
       colors: {

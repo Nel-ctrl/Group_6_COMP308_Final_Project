@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useApolloClient } from '@apollo/client';
 
-const AuthContext = createContext(null);
+const AuthContext =
+  globalThis.__COMMUNITY_HUB_AUTH_CONTEXT__ ||
+  (globalThis.__COMMUNITY_HUB_AUTH_CONTEXT__ = createContext(null));
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
