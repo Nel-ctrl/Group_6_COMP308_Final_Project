@@ -7,12 +7,7 @@ import { useAuth } from '../../../shared/context/AuthContext';
 
 export default function CreateEventPage() {
   const navigate = useNavigate();
-
-  const { user } = useAuth();   
-
-  if (user?.role !== "community_organizer") {   
-    return <p className="p-6 text-red-500">Access denied</p>;
-  }
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -27,22 +22,26 @@ export default function CreateEventPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const [createEvent, { loading }] = useMutation(CREATE_EVENT, {
-  refetchQueries: [
-  {
-    query: GET_EVENTS,
-    variables: { status: "upcoming", category: "" }
+    refetchQueries: [
+      {
+        query: GET_EVENTS,
+        variables: { status: "upcoming", category: "" }
+      }
+    ],
+    awaitRefetchQueries: true,
+
+    onCompleted: () => {
+      navigate("/events");
+    },
+
+    onError: (error) => {
+      setErrorMessage(error.message || "Failed to create event.");
+    },
+  });
+
+  if (user?.role !== "community_organizer") {
+    return <p className="p-6 text-red-500">Access denied</p>;
   }
-],
-  awaitRefetchQueries: true,
-
-  onCompleted: () => {
-    navigate("/events");
-  },
-
-  onError: (error) => {
-    setErrorMessage(error.message || "Failed to create event.");
-  },
-});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,6 +67,10 @@ export default function CreateEventPage() {
 
     if (startDate <= now) {
       return "Event date must be in the future.";
+    }
+
+    if (formData.endDate && new Date(formData.endDate) <= new Date(formData.date)) {
+      return "End date must be after start date.";
     }
 
     if (formData.maxAttendees && Number(formData.maxAttendees) < 1) {
@@ -98,7 +101,7 @@ export default function CreateEventPage() {
           : null,
           location: formData.location,
           category: formData.category,
-          maxAttendees: parseInt(formData.maxAttendees),
+          maxAttendees: formData.maxAttendees ? parseInt(formData.maxAttendees) : null,
         },
       });
     } catch (error) {}
@@ -195,7 +198,6 @@ export default function CreateEventPage() {
             onChange={handleChange}
             className="w-full border rounded px-3 py-2"
             min="1"
-            required
           />
         </div>
 
