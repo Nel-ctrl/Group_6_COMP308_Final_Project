@@ -11,7 +11,6 @@ export function AuthProvider({ children }) {
   const client = useApolloClient();
 
   useEffect(() => {
-    // On mount, check if we have a stored token and user
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     if (token && storedUser) {
