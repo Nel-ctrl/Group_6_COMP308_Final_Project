@@ -10,6 +10,7 @@ import LoginPage from './modules/auth/pages/LoginPage';
 import RegisterPage from './modules/auth/pages/RegisterPage';
 import CommunityPage from './modules/community/pages/CommunityPage';
 import BusinessesPage from './modules/business/pages/BusinessesPage';
+import BusinessCreatePage from './modules/business/pages/BusinessCreatePage';
 import EventsPage from './modules/events/pages/EventsPage';
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/community" element={<CommunityPage />} />
               <Route path="/businesses" element={<BusinessesPage />} />
+              <Route path="/businesses/create" element={<BusinessCreatePage />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/create" element={<CreateEventPage />} />
             </Routes>
