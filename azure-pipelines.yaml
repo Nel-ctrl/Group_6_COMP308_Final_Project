@@ -16,10 +16,10 @@ stages:
           - task: SonarCloudPrepare@1
             inputs:
               SonarCloud: 'SonarCloud'
-              organization: 'your-org-key'
+              organization: 'nel-ctrl'
               scannerMode: 'CLI'
               configMode: 'manual'
-              cliProjectKey: 'your-project-key'
+              cliProjectKey: 'Nel-ctrl_Group_6_COMP308_Final_Project'
               cliProjectName: 'CommunityHub'
               cliSources: 'server/services/auth-service'
 
