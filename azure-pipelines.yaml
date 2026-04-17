@@ -1,0 +1,89 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+
+  # ── CI: Build + Test + SonarCloud ──────────────────────────
+  - stage: Build
+    jobs:
+      - job: BuildAndTest
+        steps:
+
+          # SonarCloud preparation (must come before build)
+          - task: SonarCloudPrepare@1
+            inputs:
+              SonarCloud: 'SonarCloud'
+              organization: 'your-org-key'
+              scannerMode: 'CLI'
+              configMode: 'manual'
+              cliProjectKey: 'your-project-key'
+              cliProjectName: 'CommunityHub'
+              cliSources: 'server/services/auth-service'
+
+          # Step 1: Install dependencies (build tool = npm)
+          - script: |
+              cd server/services/auth-service
+              npm install
+            displayName: 'Install dependencies'
+
+          # Step 2: Run unit tests + coverage
+          - script: |
+              cd server/services/auth-service
+              npm test --if-present
+            displayName: 'Run unit tests'
+
+          # SonarCloud analysis and publish results
+          - task: SonarCloudAnalyze@1
+          - task: SonarCloudPublish@1
+            inputs:
+              pollingTimeoutSec: '300'
+
+  # ── CD: Deliver ────────────────────────────────────────────
+  - stage: Deliver
+    dependsOn: Build
+    jobs:
+      - job: DeliverArtifact
+        steps:
+          - script: |
+              cd server/services/auth-service
+              npm pack
+            displayName: 'Package artifact with npm pack'
+
+  # ── CD: Deploy Dev ─────────────────────────────────────────
+  - stage: DeployDev
+    dependsOn: Deliver
+    jobs:
+      - job: Deploy
+        steps:
+          - script: echo 'Deploying CommunityHub to Dev environment'
+            displayName: 'Deploy to Dev'
+
+  # ── CD: Deploy QAT ─────────────────────────────────────────
+  - stage: DeployQAT
+    dependsOn: DeployDev
+    jobs:
+      - job: Deploy
+        steps:
+          - script: echo 'Deploying CommunityHub to QAT environment'
+            displayName: 'Deploy to QAT'
+
+  # ── CD: Deploy Staging ──────────────────────────────────────
+  - stage: DeployStaging
+    dependsOn: DeployQAT
+    jobs:
+      - job: Deploy
+        steps:
+          - script: echo 'Deploying CommunityHub to Staging environment'
+            displayName: 'Deploy to Staging'
+
+  # ── CD: Deploy Production ───────────────────────────────────
+  - stage: DeployProd
+    dependsOn: DeployStaging
+    jobs:
+      - job: Deploy
+        steps:
+          - script: echo 'Deploying CommunityHub to Production environment'
+            displayName: 'Deploy to Production'
