@@ -11,6 +11,7 @@ const RegisterPage = React.lazy(() => import('remote_auth/RegisterPage'));
 const CommunityPage = React.lazy(() => import('remote_community/CommunityPage'));
 const BusinessesPage = React.lazy(() => import('remote_community/BusinessesPage'));
 const BusinessCreatePage = React.lazy(() => import('remote_community/BusinessCreatePage'));
+const BusinessDetailPage = React.lazy(() => import('remote_community/BusinessDetailPage'));
 const EventsPage = React.lazy(() => import('remote_events/EventsPage'));
 const CreateEventPage = React.lazy(() => import('remote_events/CreateEventPage'));
 
@@ -64,6 +65,7 @@ function RemoteRoutes() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/businesses" element={<BusinessesPage />} />
           <Route path="/businesses/create" element={<BusinessCreatePage />} />
+          <Route path="/businesses/:id" element={<BusinessDetailPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/create" element={<CreateEventPage />} />
         </Routes>
