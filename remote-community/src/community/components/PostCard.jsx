@@ -98,7 +98,7 @@ export default function PostCard({ post, onUpdate }) {
           >
             {post.replies?.length || 0} replies
           </button>
-          {user && !post.aiSummary && post.replies?.length > 0 && (
+          {user && !post.aiSummary && (
             <button
               onClick={() => summarizePost({ variables: { postId: post.id } })}
               disabled={summarizing}
