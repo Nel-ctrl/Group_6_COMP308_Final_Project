@@ -7,6 +7,7 @@ import { AuthProvider } from './shared/context/AuthContext';
 import CommunityPage from './community/pages/CommunityPage';
 import BusinessesPage from './business/pages/BusinessesPage';
 import BusinessCreatePage from './business/pages/BusinessCreatePage';
+import BusinessDetailPage from './business/pages/BusinessDetailPage';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -14,9 +15,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/community"          element={<CommunityPage />} />
-            <Route path="/businesses"         element={<BusinessesPage />} />
-            <Route path="/businesses/create"  element={<BusinessCreatePage />} />
+            <Route path="/community"             element={<CommunityPage />} />
+            <Route path="/businesses"          element={<BusinessesPage />} />
+            <Route path="/businesses/create"   element={<BusinessCreatePage />} />
+            <Route path="/businesses/:id"      element={<BusinessDetailPage />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
