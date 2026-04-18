@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_BUSINESS } from '../graphql/queries';
-import { ADD_REVIEW, ADD_DEAL } from '../graphql/mutations';
+import { ADD_REVIEW, ADD_DEAL, REPLY_TO_REVIEW } from '../graphql/mutations';
 import { useAuth } from '../../shared/context/AuthContext';
 
 const sentimentColors = {
@@ -37,6 +37,10 @@ export default function BusinessDetailPage() {
   const [reviewError, setReviewError] = useState('');
   const [dealError, setDealError] = useState('');
 
+  const [replyDrafts, setReplyDrafts] = useState({});
+  const [replyError, setReplyError] = useState('');
+  const [replySuccess, setReplySuccess] = useState('');
+
   const { data, loading, error } = useQuery(GET_BUSINESS, {
     variables: { id },
     fetchPolicy: 'network-only',
@@ -58,6 +62,18 @@ export default function BusinessDetailPage() {
       setDealError('');
     },
     onError: (err) => setDealError(err.message),
+  });
+
+  const [replyToReview, { loading: replyLoading }] = useMutation(REPLY_TO_REVIEW, {
+    refetchQueries: [{ query: GET_BUSINESS, variables: { id } }],
+    onCompleted: () => {
+      setReplyError('');
+      setReplySuccess('Reply posted successfully.');
+    },
+    onError: (err) => {
+      setReplyError(err.message);
+      setReplySuccess('');
+    },
   });
 
   if (loading) return <p className="p-6 text-gray-500">Loading...</p>;
@@ -90,6 +106,31 @@ export default function BusinessDetailPage() {
         validUntil: dealForm.validUntil ? new Date(dealForm.validUntil).toISOString() : null,
       },
     });
+  }
+
+  function handleReplySubmit(reviewIndex) {
+    const reply = (replyDrafts[reviewIndex] || '').trim();
+
+    if (!reply) {
+      setReplyError('Reply cannot be empty.');
+      setReplySuccess('');
+      return;
+    }
+
+    setReplyError('');
+
+    replyToReview({
+      variables: {
+        businessId: id,
+        reviewIndex,
+        reply,
+      },
+    });
+
+    setReplyDrafts((prev) => ({
+      ...prev,
+      [reviewIndex]: '',
+    }));
   }
 
   return (
@@ -200,6 +241,9 @@ export default function BusinessDetailPage() {
           Reviews ({biz.reviews?.length || 0})
         </h2>
 
+        {replySuccess && <p className="text-green-600 text-sm mb-3">{replySuccess}</p>}
+        {replyError && <p className="text-red-600 text-sm mb-3">{replyError}</p>}
+
         {biz.reviews?.length > 0 ? (
           <div className="space-y-4 mb-6">
             {biz.reviews.map((review, i) => (
@@ -226,6 +270,31 @@ export default function BusinessDetailPage() {
                   <div className="mt-2 bg-gray-50 border-l-4 border-primary-600 px-3 py-2 text-sm text-gray-600">
                     <span className="font-medium">Owner reply: </span>
                     {review.ownerReply}
+                  </div>
+                )}
+
+                {isOwner && !review.ownerReply && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Reply to this review
+                    </label>
+                    <textarea
+                      placeholder="Write a professional response..."
+                      value={replyDrafts[i] || ''}
+                      onChange={(e) =>
+                        setReplyDrafts((prev) => ({ ...prev, [i]: e.target.value }))
+                      }
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                      rows="3"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleReplySubmit(i)}
+                      disabled={replyLoading}
+                      className="mt-2 bg-primary-600 text-white px-4 py-2 rounded text-sm hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {replyLoading ? 'Posting...' : 'Post Reply'}
+                    </button>
                   </div>
                 )}
                 <p className="text-xs text-gray-400 mt-1">
