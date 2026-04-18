@@ -12,6 +12,7 @@ export default defineConfig({
         './HomePage':     './src/pages/HomePage',
         './LoginPage':    './src/pages/LoginPage',
         './RegisterPage': './src/pages/RegisterPage',
+        './ProfilePage': './src/pages/ProfilePage',
       },
       shared: {
         react:            { singleton: true, requiredVersion: '^18.3.1' },

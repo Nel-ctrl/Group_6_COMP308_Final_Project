@@ -45,3 +45,27 @@ export const REGISTER = gql`
     }
   }
 `;
+
+export const UPDATE_PROFILE = gql`
+  mutation UpdateProfile(
+    $name: String
+    $bio: String
+    $location: String
+    $interests: [String]
+  ) {
+    updateProfile(
+      name: $name
+      bio: $bio
+      location: $location
+      interests: $interests
+    ) {
+      id
+      email
+      name
+      role
+      bio
+      location
+      interests
+    }
+  }
+`;
