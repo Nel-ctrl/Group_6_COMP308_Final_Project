@@ -77,6 +77,12 @@ export default function EventsPage() {
                 </div>
               )}
 
+              <div className="mb-3">
+                <Link to={`/events/${event.id}`} className="text-primary-600 hover:underline text-sm">
+                  View Details →
+                </Link>
+              </div>
+
               {user && (
                 <div className="flex space-x-2">
                   {!isAttending && (
