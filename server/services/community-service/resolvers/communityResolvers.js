@@ -3,6 +3,9 @@ const Post = require('../models/Post');
 
 const AI_SERVICE_URL = `http://localhost:${process.env.AI_SERVICE_PORT || 4004}`;
 
+const TRENDS_TTL_MS = 10 * 60 * 1000;
+let trendsCache = { data: null, expiresAt: 0 };
+
 const resolvers = {
   Query: {
     getPosts: async (_, { category, limit = 20, offset = 0 }) => {
@@ -32,12 +35,20 @@ const resolvers = {
     },
 
     getTrendingTopics: async () => {
+      if (trendsCache.data && Date.now() < trendsCache.expiresAt) {
+        return trendsCache.data;
+      }
+
       try {
-        // Get recent posts and let AI detect trends
         const recentPosts = await Post.find()
           .sort({ createdAt: -1 })
           .limit(100)
           .select('title content tags');
+
+        if (recentPosts.length === 0) {
+          trendsCache = { data: [], expiresAt: Date.now() + TRENDS_TTL_MS };
+          return [];
+        }
 
         const response = await axios.post(`${AI_SERVICE_URL}/api/trends`, {
           posts: recentPosts.map((p) => ({
@@ -47,10 +58,11 @@ const resolvers = {
           })),
         });
 
+        trendsCache = { data: response.data.trends, expiresAt: Date.now() + TRENDS_TTL_MS };
         return response.data.trends;
       } catch (error) {
         console.error('AI trend detection failed:', error.message);
-        return [];
+        return trendsCache.data || [];
       }
     },
   },
