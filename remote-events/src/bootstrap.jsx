@@ -6,6 +6,7 @@ import apolloClient from './apollo/client';
 import { AuthProvider } from './shared/context/AuthContext';
 import EventsPage from './pages/EventsPage';
 import CreateEventPage from './pages/CreateEventPage';
+import EventDetailPage from './pages/EventDetailPage';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -13,8 +14,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/events"        element={<EventsPage />} />
-            <Route path="/events/create" element={<CreateEventPage />} />
+            <Route path="/events"         element={<EventsPage />} />
+            <Route path="/events/create"  element={<CreateEventPage />} />
+            <Route path="/events/:id"     element={<EventDetailPage />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

@@ -9,8 +9,9 @@ export default defineConfig({
       name: 'remote_events',
       filename: 'remoteEntry.js',
       exposes: {
-        './EventsPage':      './src/pages/EventsPage',
-        './CreateEventPage': './src/pages/CreateEventPage',
+        './EventsPage':       './src/pages/EventsPage',
+        './CreateEventPage':  './src/pages/CreateEventPage',
+        './EventDetailPage':  './src/pages/EventDetailPage',
       },
       shared: {
         react:              { singleton: true, requiredVersion: '^18.3.1' },

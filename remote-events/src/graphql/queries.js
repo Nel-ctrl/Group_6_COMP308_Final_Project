@@ -62,3 +62,14 @@ export const GET_OPTIMAL_TIME = gql`
     getOptimalEventTime(category: $category, location: $location)
   }
 `;
+
+export const GET_VOLUNTEER_MATCHES = gql`
+  query GetVolunteerMatches($eventId: ID!) {
+    getVolunteerMatches(eventId: $eventId) {
+      userId
+      name
+      matchScore
+      reason
+    }
+  }
+`;

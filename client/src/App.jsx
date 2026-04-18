@@ -14,6 +14,7 @@ const BusinessCreatePage = React.lazy(() => import('remote_community/BusinessCre
 const BusinessDetailPage = React.lazy(() => import('remote_community/BusinessDetailPage'));
 const EventsPage = React.lazy(() => import('remote_events/EventsPage'));
 const CreateEventPage = React.lazy(() => import('remote_events/CreateEventPage'));
+const EventDetailPage = React.lazy(() => import('remote_events/EventDetailPage'));
 
 class RemoteErrorBoundary extends React.Component {
   constructor(props) {
@@ -68,6 +69,7 @@ function RemoteRoutes() {
           <Route path="/businesses/:id" element={<BusinessDetailPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/create" element={<CreateEventPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
         </Routes>
       </Suspense>
     </RemoteErrorBoundary>
