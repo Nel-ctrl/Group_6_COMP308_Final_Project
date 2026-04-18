@@ -12,6 +12,7 @@ export default defineConfig({
         './CommunityPage': './src/community/pages/CommunityPage',
         './BusinessesPage': './src/business/pages/BusinessesPage',
         './BusinessCreatePage': './src/business/pages/BusinessCreatePage',
+        './BusinessDetailPage': './src/business/pages/BusinessDetailPage',
       },
       shared: {
         react:              { singleton: true, requiredVersion: '^18.3.1' },

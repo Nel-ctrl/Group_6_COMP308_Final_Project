@@ -10,7 +10,7 @@ export default String.raw`
   p-8 p-6 p-5 p-4 p-3 p-2
   mt-12 mt-10 mt-8 mt-4 mt-3 mt-2 mt-1
   mb-12 mb-8 mb-6 mb-4 mb-3 mb-2 mb-1
-  pt-6 pt-3
+  pt-6 pt-4 pt-3
   grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:grid-cols-4 lg:grid-cols-4 lg:col-span-3 lg:col-span-1
   flex hidden md:flex flex-wrap items-center items-start justify-center justify-between
   gap-6 gap-4 gap-1 space-x-6 space-x-4 space-x-3 space-x-2 space-y-4 space-y-2 space-y-1
