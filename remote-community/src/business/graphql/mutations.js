@@ -64,3 +64,19 @@ export const ADD_DEAL = gql`
     }
   }
 `;
+
+export const REPLY_TO_REVIEW = gql`
+  mutation ReplyToReview($businessId: ID!, $reviewIndex: Int!, $reply: String!) {
+    replyToReview(businessId: $businessId, reviewIndex: $reviewIndex, reply: $reply) {
+      id
+      reviews {
+        authorId
+        rating
+        comment
+        sentiment
+        ownerReply
+        createdAt
+      }
+    }
+  }
+`;
