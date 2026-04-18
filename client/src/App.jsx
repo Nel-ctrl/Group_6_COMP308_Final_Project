@@ -8,6 +8,7 @@ import Navbar from './shared/components/Navbar';
 const HomePage = React.lazy(() => import('remote_auth/HomePage'));
 const LoginPage = React.lazy(() => import('remote_auth/LoginPage'));
 const RegisterPage = React.lazy(() => import('remote_auth/RegisterPage'));
+const ProfilePage = React.lazy(() => import('remote_auth/ProfilePage'));
 const CommunityPage = React.lazy(() => import('remote_community/CommunityPage'));
 const BusinessesPage = React.lazy(() => import('remote_community/BusinessesPage'));
 const BusinessCreatePage = React.lazy(() => import('remote_community/BusinessCreatePage'));
@@ -63,6 +64,7 @@ function RemoteRoutes() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/businesses" element={<BusinessesPage />} />
           <Route path="/businesses/create" element={<BusinessCreatePage />} />

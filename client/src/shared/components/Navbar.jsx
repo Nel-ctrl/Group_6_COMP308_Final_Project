@@ -36,9 +36,17 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
+                <Link
+                  to="/profile"
+                  className="hover:text-primary-200 transition text-sm"
+                >
+                  Profile
+                </Link>
+
                 <span className="text-sm text-primary-200">
                   {user.name} ({user.role.replace('_', ' ')})
                 </span>
+
                 <button
                   onClick={handleLogout}
                   className="bg-primary-500 hover:bg-primary-400 px-3 py-1.5 rounded text-sm transition"
