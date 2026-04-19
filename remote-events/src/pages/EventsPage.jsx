@@ -3,20 +3,7 @@ import { GET_EVENTS } from '../graphql/queries';
 import { JOIN_EVENT, VOLUNTEER_FOR_EVENT } from '../graphql/mutations';
 import { useAuth } from '../shared/context/AuthContext';
 import { Link } from 'react-router-dom';
-
-function formatEventDate(dateValue) {
-  if (!dateValue) return "No date";
-  const parsedDate = new Date(Number(dateValue));
-  if (isNaN(parsedDate.getTime())) return "Invalid Date";
-  return parsedDate.toLocaleString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import { formatEventDate } from '../utils/dateUtils';
 
 export default function EventsPage() {
   const { user } = useAuth();

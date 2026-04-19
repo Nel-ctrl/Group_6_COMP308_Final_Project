@@ -4,20 +4,7 @@ import { useQuery, useMutation } from '@apollo/client';
 import { GET_EVENT, GET_OPTIMAL_TIME, GET_VOLUNTEER_MATCHES } from '../graphql/queries';
 import { JOIN_EVENT, VOLUNTEER_FOR_EVENT, UPDATE_EVENT, DELETE_EVENT } from '../graphql/mutations';
 import { useAuth } from '../shared/context/AuthContext';
-
-function formatEventDate(dateValue) {
-  if (!dateValue) return 'No date';
-  const parsed = new Date(Number(dateValue));
-  if (isNaN(parsed.getTime())) return 'Invalid Date';
-  return parsed.toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
+import { formatEventDate } from '../utils/dateUtils';
 
 function toDatetimeLocal(timestamp) {
   if (!timestamp) return '';

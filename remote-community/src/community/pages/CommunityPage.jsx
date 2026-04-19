@@ -14,12 +14,13 @@ export default function CommunityPage() {
     variables: { category: category || undefined, limit: 20 },
   });
 
-  const { data: trendingData } = useQuery(GET_TRENDING_TOPICS);
+  const { data: trendingData } = useQuery(GET_TRENDING_TOPICS, {
+    fetchPolicy: 'cache-first',
+  });
 
   const [alertBanner, setAlertBanner] = useState(null);
   useSubscription(EMERGENCY_ALERT_CREATED, {
     onData: ({ data }) => {
-      console.log('[Subscription] onData fired:', data);
       const alert = data?.data?.emergencyAlertCreated;
       if (alert) {
         setAlertBanner(alert);

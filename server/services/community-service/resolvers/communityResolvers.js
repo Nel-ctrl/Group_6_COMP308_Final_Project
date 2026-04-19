@@ -89,7 +89,6 @@ const resolvers = {
       });
 
       if (category === 'emergency_alert') {
-        console.log('[PubSub] Publishing emergency alert:', post.title);
         pubsub.publish(EMERGENCY_ALERT_CREATED, { emergencyAlertCreated: post });
       }
 
