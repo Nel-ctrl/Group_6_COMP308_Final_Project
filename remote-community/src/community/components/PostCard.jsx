@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client';
-import { ADD_REPLY, SUMMARIZE_POST } from '../graphql/mutations';
+import { ADD_REPLY, SUMMARIZE_POST, UPDATE_POST, DELETE_POST } from '../graphql/mutations';
 import { useAuth } from '../../shared/context/AuthContext';
 
 const categoryColors = {
@@ -14,6 +14,12 @@ export default function PostCard({ post, onUpdate }) {
   const { user } = useAuth();
   const [replyContent, setReplyContent] = useState('');
   const [showReplies, setShowReplies] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(post.title);
+  const [editContent, setEditContent] = useState(post.content);
+  const [editTags, setEditTags] = useState((post.tags || []).join(', '));
+
+  const isAuthor = user?.id === post.author?.id;
 
   const [addReply, { loading: replyLoading }] = useMutation(ADD_REPLY, {
     onCompleted: () => {
@@ -26,10 +32,84 @@ export default function PostCard({ post, onUpdate }) {
     onCompleted: onUpdate,
   });
 
+  const [updatePost, { loading: updateLoading }] = useMutation(UPDATE_POST, {
+    onCompleted: () => {
+      setIsEditing(false);
+      onUpdate();
+    },
+  });
+
+  const [deletePost, { loading: deleteLoading }] = useMutation(DELETE_POST, {
+    onCompleted: onUpdate,
+  });
+
   function handleReply(e) {
     e.preventDefault();
     if (!replyContent.trim()) return;
     addReply({ variables: { postId: post.id, content: replyContent } });
+  }
+
+  function handleUpdate(e) {
+    e.preventDefault();
+    updatePost({
+      variables: {
+        id: post.id,
+        title: editTitle,
+        content: editContent,
+        tags: editTags.split(',').map((t) => t.trim()).filter(Boolean),
+      },
+    });
+  }
+
+  function handleDelete() {
+    if (!window.confirm('Delete this post?')) return;
+    deletePost({ variables: { id: post.id } });
+  }
+
+  if (isEditing) {
+    return (
+      <div className="bg-white p-5 rounded-lg shadow">
+        <form onSubmit={handleUpdate} className="space-y-3">
+          <input
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-semibold"
+            required
+          />
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            rows="4"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            required
+          />
+          <input
+            type="text"
+            value={editTags}
+            onChange={(e) => setEditTags(e.target.value)}
+            placeholder="Tags (comma-separated)"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+          />
+          <div className="flex space-x-2">
+            <button
+              type="submit"
+              disabled={updateLoading}
+              className="bg-primary-600 text-white px-4 py-2 rounded text-sm hover:bg-primary-700 transition disabled:opacity-50"
+            >
+              {updateLoading ? 'Saving...' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="bg-gray-100 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-200 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    );
   }
 
   return (
@@ -106,6 +186,20 @@ export default function PostCard({ post, onUpdate }) {
             >
               {summarizing ? 'Summarizing...' : 'AI Summarize'}
             </button>
+          )}
+          {isAuthor && (
+            <>
+              <button onClick={() => setIsEditing(true)} className="text-gray-500 hover:underline">
+                Edit
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleteLoading}
+                className="text-red-500 hover:underline disabled:opacity-50"
+              >
+                Delete
+              </button>
+            </>
           )}
         </div>
       </div>

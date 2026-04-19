@@ -89,3 +89,24 @@ export const REPLY_TO_REVIEW = gql`
     }
   }
 `;
+
+export const UPDATE_BUSINESS = gql`
+  mutation UpdateBusiness($id: ID!, $name: String, $description: String, $category: String, $address: String, $phone: String, $website: String, $hours: String) {
+    updateBusiness(id: $id, name: $name, description: $description, category: $category, address: $address, phone: $phone, website: $website, hours: $hours) {
+      id
+      name
+      description
+      category
+      address
+      phone
+      website
+      hours
+    }
+  }
+`;
+
+export const DELETE_BUSINESS = gql`
+  mutation DeleteBusiness($id: ID!) {
+    deleteBusiness(id: $id)
+  }
+`;
