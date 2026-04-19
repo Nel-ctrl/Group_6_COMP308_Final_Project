@@ -1,4 +1,4 @@
-# CommunityHub
+# The Bulletin
 
 **COMP308 — Emerging Technologies | Group 6**
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-CommunityHub is an AI-powered neighborhood platform where residents, business owners, and community organizers can post discussions, list businesses, and manage events. It uses a microservices backend with Apollo Federation and integrates Google Gemini AI for sentiment analysis, post summarization, trend detection, volunteer matching, and event scheduling optimization.
+The Bulletin is an AI-powered neighborhood platform where residents, business owners, and community organizers can post discussions, list businesses, and manage events. It uses a microservices backend with Apollo Federation and integrates Google Gemini AI for sentiment analysis, post summarization, trend detection, volunteer matching, and event scheduling optimization.
 
 The frontend is built as a **Micro-Frontend (MFE)** architecture using Vite Module Federation. The host shell loads each remote app at runtime, enabling independent development and deployment per domain.
 

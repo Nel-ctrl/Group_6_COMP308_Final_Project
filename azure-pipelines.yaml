@@ -17,7 +17,7 @@ stages:
               scannerMode: 'cli'
               configMode: 'manual'
               cliProjectKey: 'Nel-ctrl_Group_6_COMP308_Final_Project'
-              cliProjectName: 'CommunityHub'
+              cliProjectName: 'TheBulletin'
               cliSources: 'server/services/auth-service'
 
           - script: |
@@ -49,7 +49,7 @@ stages:
     jobs:
       - job: Deploy
         steps:
-          - script: echo 'Deploying CommunityHub to Dev environment'
+          - script: echo 'Deploying The Bulletin to Dev environment'
             displayName: 'Deploy to Dev'
 
   - stage: DeployQAT
@@ -57,7 +57,7 @@ stages:
     jobs:
       - job: Deploy
         steps:
-          - script: echo 'Deploying CommunityHub to QAT environment'
+          - script: echo 'Deploying The Bulletin to QAT environment'
             displayName: 'Deploy to QAT'
 
   - stage: DeployStaging
@@ -65,7 +65,7 @@ stages:
     jobs:
       - job: Deploy
         steps:
-          - script: echo 'Deploying CommunityHub to Staging environment'
+          - script: echo 'Deploying The Bulletin to Staging environment'
             displayName: 'Deploy to Staging'
 
   - stage: DeployProd
@@ -73,5 +73,5 @@ stages:
     jobs:
       - job: Deploy
         steps:
-          - script: echo 'Deploying CommunityHub to Production environment'
+          - script: echo 'Deploying The Bulletin to Production environment'
             displayName: 'Deploy to Production'

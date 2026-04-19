@@ -48,7 +48,7 @@ export default function RegisterPage() {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 py-8">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Join CommunityHub
+          Join The Bulletin
         </h2>
 
         {error && (

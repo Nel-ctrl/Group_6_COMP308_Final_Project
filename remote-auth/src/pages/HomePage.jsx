@@ -9,7 +9,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold text-gray-900 mb-4">
-          Welcome to <span className="text-primary-600">CommunityHub</span>
+          Welcome to <span className="text-primary-600">The Bulletin</span>
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           An AI-powered platform that connects your local community.
