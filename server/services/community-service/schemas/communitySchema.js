@@ -62,6 +62,10 @@ const typeDefs = gql`
 
     summarizePost(postId: ID!): Post!
   }
+
+  type Subscription {
+    emergencyAlertCreated: Post!
+  }
 `;
 
 module.exports = typeDefs;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_POSTS, GET_TRENDING_TOPICS } from '../graphql/queries';
+import { useQuery, useSubscription } from '@apollo/client';
+import { GET_POSTS, GET_TRENDING_TOPICS, EMERGENCY_ALERT_CREATED } from '../graphql/queries';
 import PostCard from '../components/PostCard';
 import CreatePostForm from '../components/CreatePostForm';
 import { useAuth } from '../../shared/context/AuthContext';
@@ -16,6 +16,19 @@ export default function CommunityPage() {
 
   const { data: trendingData } = useQuery(GET_TRENDING_TOPICS);
 
+  const [alertBanner, setAlertBanner] = useState(null);
+  useSubscription(EMERGENCY_ALERT_CREATED, {
+    onData: ({ data }) => {
+      console.log('[Subscription] onData fired:', data);
+      const alert = data?.data?.emergencyAlertCreated;
+      if (alert) {
+        setAlertBanner(alert);
+        refetch();
+      }
+    },
+    onError: (err) => console.error('[Subscription] error:', err),
+  });
+
   const categories = [
     { value: '', label: 'All' },
     { value: 'news', label: 'News' },
@@ -26,6 +39,22 @@ export default function CommunityPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
+      {alertBanner && (
+        <div className="mb-4 bg-red-600 text-white px-5 py-4 rounded-lg shadow-lg flex items-start justify-between">
+          <div>
+            <p className="font-bold text-sm uppercase tracking-wide mb-1">Emergency Alert</p>
+            <p className="font-semibold">{alertBanner.title}</p>
+            <p className="text-sm text-red-100 mt-1">{alertBanner.content}</p>
+          </div>
+          <button
+            onClick={() => setAlertBanner(null)}
+            className="ml-4 text-red-200 hover:text-white text-xl leading-none"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Community Board</h1>
         {user && (

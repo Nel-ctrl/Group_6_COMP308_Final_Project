@@ -99,3 +99,14 @@ export const GET_TRENDING_TOPICS = gql`
     }
   }
 `;
+
+export const EMERGENCY_ALERT_CREATED = gql`
+  subscription EmergencyAlertCreated {
+    emergencyAlertCreated {
+      id
+      title
+      content
+      createdAt
+    }
+  }
+`;

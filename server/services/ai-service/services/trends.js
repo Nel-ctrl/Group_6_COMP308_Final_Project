@@ -20,11 +20,17 @@ Respond in this exact JSON format (no markdown, no code blocks):
   ...
 ]`;
 
-  const result = await model.generateContent(prompt);
+  let result;
+  try {
+    result = await model.generateContent(prompt);
+  } catch (err) {
+    console.error('[Gemini trends] API error:', err?.message, 'status:', err?.status, 'details:', JSON.stringify(err?.errorDetails));
+    throw err;
+  }
+
   const responseText = result.response.text().trim();
 
   try {
-    // Strip markdown code blocks if present
     const cleaned = responseText.replace(/```json\n?|\n?```/g, '').trim();
     return JSON.parse(cleaned);
   } catch (error) {
