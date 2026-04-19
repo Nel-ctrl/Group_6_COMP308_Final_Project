@@ -1,9 +1,13 @@
 const axios = require('axios');
+const { PubSub } = require('graphql-subscriptions');
 const Post = require('../models/Post');
+
+const pubsub = new PubSub();
+const EMERGENCY_ALERT_CREATED = 'EMERGENCY_ALERT_CREATED';
 
 const AI_SERVICE_URL = `http://localhost:${process.env.AI_SERVICE_PORT || 4004}`;
 
-const TRENDS_TTL_MS = 10 * 60 * 1000;
+const TRENDS_TTL_MS = 60 * 60 * 1000; // 1 hour
 let trendsCache = { data: null, expiresAt: 0 };
 
 const resolvers = {
@@ -71,6 +75,10 @@ const resolvers = {
     createPost: async (_, { title, content, category, tags, isUrgent }, { user }) => {
       if (!user) throw new Error('Not authenticated');
 
+      if (category === 'emergency_alert' && !['resident', 'community_organizer'].includes(user.role)) {
+        throw new Error('Only residents and organizers can post emergency alerts');
+      }
+
       const post = await Post.create({
         title,
         content,
@@ -79,6 +87,11 @@ const resolvers = {
         isUrgent: isUrgent || false,
         authorId: user.id,
       });
+
+      if (category === 'emergency_alert') {
+        console.log('[PubSub] Publishing emergency alert:', post.title);
+        pubsub.publish(EMERGENCY_ALERT_CREATED, { emergencyAlertCreated: post });
+      }
 
       // Asynchronously analyze sentiment (don't block the response)
       axios
@@ -141,6 +154,12 @@ const resolvers = {
       }
 
       return post;
+    },
+  },
+
+  Subscription: {
+    emergencyAlertCreated: {
+      subscribe: () => pubsub.asyncIterableIterator(EMERGENCY_ALERT_CREATED),
     },
   },
 
