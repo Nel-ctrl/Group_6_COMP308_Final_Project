@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_POST } from '../graphql/mutations';
+import { useAuth } from '../../shared/context/AuthContext';
 
 export default function CreatePostForm({ onPostCreated }) {
+  const { user } = useAuth();
+  const canPostAlert = ['resident', 'community_organizer'].includes(user?.role);
+
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -57,7 +61,7 @@ export default function CreatePostForm({ onPostCreated }) {
               <option value="news">News</option>
               <option value="discussion">Discussion</option>
               <option value="help_request">Help Request</option>
-              <option value="emergency_alert">Emergency Alert</option>
+              {canPostAlert && <option value="emergency_alert">Emergency Alert</option>}
             </select>
           </div>
         </div>
