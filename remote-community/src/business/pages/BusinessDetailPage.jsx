@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_BUSINESS } from '../graphql/queries';
-import { ADD_REVIEW, ADD_DEAL, REPLY_TO_REVIEW, ADD_BUSINESS_IMAGE } from '../graphql/mutations';
+import { ADD_REVIEW, ADD_DEAL, REPLY_TO_REVIEW, ADD_BUSINESS_IMAGE, UPDATE_BUSINESS, DELETE_BUSINESS } from '../graphql/mutations';
 import { useAuth } from '../../shared/context/AuthContext';
 
 const sentimentColors = {
@@ -31,6 +31,10 @@ function StarRating({ value, onChange }) {
 export default function BusinessDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({});
 
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' });
   const [dealForm, setDealForm] = useState({ title: '', description: '', validUntil: '' });
@@ -93,6 +97,15 @@ export default function BusinessDetailPage() {
     },
   });
 
+  const [updateBusiness, { loading: updateLoading }] = useMutation(UPDATE_BUSINESS, {
+    refetchQueries: [{ query: GET_BUSINESS, variables: { id } }],
+    onCompleted: () => setIsEditing(false),
+  });
+
+  const [deleteBusiness, { loading: deleteLoading }] = useMutation(DELETE_BUSINESS, {
+    onCompleted: () => navigate('/businesses'),
+  });
+
   if (loading) return <p className="p-6 text-gray-500">Loading...</p>;
   if (error) return <p className="p-6 text-red-500">Error: {error.message}</p>;
 
@@ -150,6 +163,29 @@ export default function BusinessDetailPage() {
     }));
   }
 
+  function startEditing() {
+    setEditForm({
+      name: biz.name,
+      description: biz.description,
+      category: biz.category,
+      address: biz.address || '',
+      phone: biz.phone || '',
+      website: biz.website || '',
+      hours: biz.hours || '',
+    });
+    setIsEditing(true);
+  }
+
+  function handleBusinessUpdate(e) {
+    e.preventDefault();
+    updateBusiness({ variables: { id, ...editForm } });
+  }
+
+  function handleBusinessDelete() {
+    if (!window.confirm('Delete this business?')) return;
+    deleteBusiness({ variables: { id } });
+  }
+
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -191,36 +227,119 @@ export default function BusinessDetailPage() {
 
       {/* Business Info */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex justify-between items-start mb-2">
-          <h1 className="text-3xl font-bold text-gray-800">{biz.name}</h1>
-          {biz.averageRating > 0 && (
-            <span className="text-yellow-600 font-semibold text-lg">
-              ★ {biz.averageRating.toFixed(1)}
-            </span>
-          )}
-        </div>
-        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-          {biz.category}
-        </span>
-        <p className="text-gray-700 mt-3">{biz.description}</p>
-        <div className="mt-4 space-y-1 text-sm text-gray-600">
-          {biz.address && <p>{biz.address}</p>}
-          {biz.phone && <p>{biz.phone}</p>}
-          {biz.website && (
-            <p>
-              <a
-                href={biz.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary-600 hover:underline"
+        {isEditing ? (
+          <form onSubmit={handleBusinessUpdate} className="space-y-3">
+            <input
+              type="text"
+              value={editForm.name}
+              onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+              placeholder="Business name"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-semibold"
+              required
+            />
+            <textarea
+              value={editForm.description}
+              onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
+              placeholder="Description"
+              rows="3"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              required
+            />
+            <input
+              type="text"
+              value={editForm.address}
+              onChange={(e) => setEditForm((p) => ({ ...p, address: e.target.value }))}
+              placeholder="Address"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+            <input
+              type="text"
+              value={editForm.phone}
+              onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
+              placeholder="Phone"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+            <input
+              type="text"
+              value={editForm.website}
+              onChange={(e) => setEditForm((p) => ({ ...p, website: e.target.value }))}
+              placeholder="Website"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+            <input
+              type="text"
+              value={editForm.hours}
+              onChange={(e) => setEditForm((p) => ({ ...p, hours: e.target.value }))}
+              placeholder="Hours (e.g. Mon-Fri 9am-5pm)"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+            <div className="flex space-x-2">
+              <button
+                type="submit"
+                disabled={updateLoading}
+                className="bg-primary-600 text-white px-4 py-2 rounded text-sm hover:bg-primary-700 transition disabled:opacity-50"
               >
-                {biz.website}
-              </a>
-            </p>
-          )}
-          {biz.hours && <p>Hours: {biz.hours}</p>}
-          <p className="text-gray-500">Owner: {biz.owner?.name || 'Unknown'}</p>
-        </div>
+                {updateLoading ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="bg-gray-100 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-200 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          <>
+            <div className="flex justify-between items-start mb-2">
+              <h1 className="text-3xl font-bold text-gray-800">{biz.name}</h1>
+              <div className="flex items-center space-x-2">
+                {biz.averageRating > 0 && (
+                  <span className="text-yellow-600 font-semibold text-lg">
+                    ★ {biz.averageRating.toFixed(1)}
+                  </span>
+                )}
+                {isOwner && (
+                  <>
+                    <button onClick={startEditing} className="text-sm text-gray-500 hover:underline">
+                      Edit
+                    </button>
+                    <button
+                      onClick={handleBusinessDelete}
+                      disabled={deleteLoading}
+                      className="text-sm text-red-500 hover:underline disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+              {biz.category}
+            </span>
+            <p className="text-gray-700 mt-3">{biz.description}</p>
+            <div className="mt-4 space-y-1 text-sm text-gray-600">
+              {biz.address && <p>{biz.address}</p>}
+              {biz.phone && <p>{biz.phone}</p>}
+              {biz.website && (
+                <p>
+                  <a
+                    href={biz.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-600 hover:underline"
+                  >
+                    {biz.website}
+                  </a>
+                </p>
+              )}
+              {biz.hours && <p>Hours: {biz.hours}</p>}
+              <p className="text-gray-500">Owner: {biz.owner?.name || 'Unknown'}</p>
+            </div>
+          </>
+        )}
         {biz.images?.length > 0 && (
           <div className="mt-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Photos</h2>

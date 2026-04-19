@@ -47,3 +47,22 @@ export const VOLUNTEER_FOR_EVENT = gql`
     }
   }
 `;
+
+export const UPDATE_EVENT = gql`
+  mutation UpdateEvent($id: ID!, $title: String, $description: String, $date: String, $location: String, $status: String) {
+    updateEvent(id: $id, title: $title, description: $description, date: $date, location: $location, status: $status) {
+      id
+      title
+      description
+      date
+      location
+      status
+    }
+  }
+`;
+
+export const DELETE_EVENT = gql`
+  mutation DeleteEvent($id: ID!) {
+    deleteEvent(id: $id)
+  }
+`;
