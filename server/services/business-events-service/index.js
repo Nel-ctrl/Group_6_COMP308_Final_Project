@@ -24,7 +24,8 @@ async function start() {
   app.use(
     '/graphql',
     cors(),
-    express.json(),
+    express.json({ limit: '5mb' }),
+    express.urlencoded({ limit: '5mb', extended: true }),
     expressMiddleware(server, { context: buildContext })
   );
 

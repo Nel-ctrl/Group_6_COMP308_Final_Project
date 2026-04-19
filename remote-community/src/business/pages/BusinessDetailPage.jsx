@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_BUSINESS } from '../graphql/queries';
-import { ADD_REVIEW, ADD_DEAL, REPLY_TO_REVIEW } from '../graphql/mutations';
+import { ADD_REVIEW, ADD_DEAL, REPLY_TO_REVIEW, ADD_BUSINESS_IMAGE } from '../graphql/mutations';
 import { useAuth } from '../../shared/context/AuthContext';
 
 const sentimentColors = {
@@ -41,6 +41,10 @@ export default function BusinessDetailPage() {
   const [replyError, setReplyError] = useState('');
   const [replySuccess, setReplySuccess] = useState('');
 
+  const [imageFile, setImageFile] = useState(null);
+  const [imageError, setImageError] = useState('');
+  const [imageSuccess, setImageSuccess] = useState('');
+
   const { data, loading, error } = useQuery(GET_BUSINESS, {
     variables: { id },
     fetchPolicy: 'network-only',
@@ -62,6 +66,19 @@ export default function BusinessDetailPage() {
       setDealError('');
     },
     onError: (err) => setDealError(err.message),
+  });
+
+  const [addBusinessImage, { loading: imageLoading }] = useMutation(ADD_BUSINESS_IMAGE, {
+    refetchQueries: [{ query: GET_BUSINESS, variables: { id } }],
+    onCompleted: () => {
+      setImageFile(null);
+      setImageError('');
+      setImageSuccess('Image uploaded successfully.');
+    },
+    onError: (err) => {
+      setImageError(err.message || 'Failed to upload image.');
+      setImageSuccess('');
+    },
   });
 
   const [replyToReview, { loading: replyLoading }] = useMutation(REPLY_TO_REVIEW, {
@@ -133,6 +150,39 @@ export default function BusinessDetailPage() {
     }));
   }
 
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  }
+
+  async function handleImageSubmit(e) {
+    e.preventDefault();
+
+    if (!imageFile) {
+      setImageError('Please select an image.');
+      setImageSuccess('');
+      return;
+    }
+
+    try {
+      const base64Image = await fileToBase64(imageFile);
+
+      await addBusinessImage({
+        variables: {
+          businessId: id,
+          image: base64Image,
+        },
+      });
+    } catch (err) {
+      setImageError('Failed to process image.');
+      setImageSuccess('');
+    }
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
       <Link to="/businesses" className="text-primary-600 hover:underline text-sm mb-4 block">
@@ -171,6 +221,64 @@ export default function BusinessDetailPage() {
           {biz.hours && <p>Hours: {biz.hours}</p>}
           <p className="text-gray-500">Owner: {biz.owner?.name || 'Unknown'}</p>
         </div>
+        {biz.images?.length > 0 && (
+          <div className="mt-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Photos</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {biz.images.map((image, index) => (
+                <div
+                  key={index}
+                  className="overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
+                >
+                  <img
+                    src={image}
+                    alt={`${biz.name} ${index + 1}`}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {isOwner && (
+          <form onSubmit={handleImageSubmit} className="mt-6 border-t border-gray-300 pt-6 space-y-3">
+            <h3 className="font-medium text-gray-700">Upload Business Image</h3>
+
+            {imageError && <p className="text-red-600 text-sm">{imageError}</p>}
+            {imageSuccess && <p className="text-green-600 text-sm">{imageSuccess}</p>}
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+
+                if (file && file.size > 5 * 1024 * 1024) {
+                  setImageFile(null);
+                  setImageError('Image must be smaller than 5 MB.');
+                  setImageSuccess('');
+                  return;
+                }
+
+                setImageFile(file);
+                setImageError('');
+                setImageSuccess('');
+              }}
+              className="block w-full text-sm text-gray-600"
+            />
+            <p className="text-xs text-gray-500">
+              Please upload an image smaller than 5 MB. Exact duplicate images are not allowed.
+            </p>
+
+            <button
+              type="submit"
+              disabled={imageLoading}
+              className="bg-primary-600 text-white px-4 py-2 rounded text-sm hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {imageLoading ? 'Uploading...' : 'Upload Image'}
+            </button>
+          </form>
+        )}
       </div>
 
       {/* Deals */}

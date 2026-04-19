@@ -39,6 +39,10 @@ const businessSchema = new mongoose.Schema(
     phone: String,
     website: String,
     hours: String,
+    images: {
+      type: [String],
+      default: [],
+    },
     deals: [
       {
         title: { type: String, required: true },

@@ -65,6 +65,15 @@ export const ADD_DEAL = gql`
   }
 `;
 
+export const ADD_BUSINESS_IMAGE = gql`
+  mutation AddBusinessImage($businessId: ID!, $image: String!) {
+    addBusinessImage(businessId: $businessId, image: $image) {
+      id
+      images
+    }
+  }
+`;
+
 export const REPLY_TO_REVIEW = gql`
   mutation ReplyToReview($businessId: ID!, $reviewIndex: Int!, $reply: String!) {
     replyToReview(businessId: $businessId, reviewIndex: $reviewIndex, reply: $reply) {
