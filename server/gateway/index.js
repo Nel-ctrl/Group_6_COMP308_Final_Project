@@ -39,7 +39,8 @@ async function startGateway() {
   app.use(
     '/graphql',
     cors(),
-    express.json(),
+    express.json({ limit: '5mb' }),
+    express.urlencoded({ limit: '5mb', extended: true }),
     expressMiddleware(server, {
       // Forward the Authorization header to subgraph services
       context: async ({ req }) => ({

@@ -124,6 +124,25 @@ const resolvers = {
       return business.save();
     },
 
+    addBusinessImage: async (_, { businessId, image }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+      if (!image?.trim()) throw new Error('Image is required');
+
+      const business = await Business.findById(businessId);
+      if (!business) throw new Error('Business not found');
+
+      if (business.ownerId !== user.id) {
+        throw new Error('Not authorized');
+      }
+
+      if (business.images.includes(image)) {
+        throw new Error('This image has already been uploaded.');
+      }
+
+      business.images.push(image);
+      return business.save();
+    },
+
     addReview: async (_, { businessId, rating, comment }, { user }) => {
       if (!user) throw new Error('Not authenticated');
       const business = await Business.findById(businessId);

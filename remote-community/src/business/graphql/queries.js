@@ -50,6 +50,7 @@ export const GET_BUSINESS = gql`
       phone
       website
       hours
+      images
       deals {
         title
         description

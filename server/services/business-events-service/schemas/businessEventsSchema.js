@@ -36,6 +36,7 @@ const typeDefs = gql`
     phone: String
     website: String
     hours: String
+    images: [String]
     deals: [Deal]
     reviews: [Review]
     averageRating: Float
@@ -123,6 +124,11 @@ const typeDefs = gql`
       title: String!
       description: String
       validUntil: String
+    ): Business!
+
+    addBusinessImage(
+      businessId: ID!
+      image: String!
     ): Business!
 
     addReview(
